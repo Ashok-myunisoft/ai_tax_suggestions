@@ -2,6 +2,8 @@ from __future__ import annotations
 import json
 from datetime import date
 from typing import Any
+import re
+from datetime import date, timedelta
 
 
 # ── SlNo → field name mapping ─────────────────────────────────────────────────
@@ -75,10 +77,16 @@ def _int(v: Any) -> int:
 
 
 def _age(dob_str: str) -> int:
-    """Calculate age from DOB string like '1968-09-16'."""
+    """Handles both ISO ('1968-09-16') and the ERP's ASP.NET date
+    format ('/Date(-40714200000)/')."""
     try:
-        dob    = date.fromisoformat(dob_str)
-        today  = date.today()
+        m = re.match(r"/Date\((-?\d+)\)/", dob_str or "")
+        if m:
+            ms = int(m.group(1))
+            dob = date(1970, 1, 1) + timedelta(milliseconds=ms)
+        else:
+            dob = date.fromisoformat(dob_str)
+        today = date.today()
         return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
     except Exception:
         return 0

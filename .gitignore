@@ -2,3 +2,9 @@
 config.json
 secrets.json
 *.env
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+config.py
