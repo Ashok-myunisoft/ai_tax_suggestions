@@ -103,3 +103,23 @@ RULE C — Suggestion clarity checklist (apply to every suggestion before output
 - Does it explain why in one sentence? If not, add it.
 - Is the tax_saving field honest about new regime limitations? It must be.
 - Is the timeline realistic and specific? "March 31, 2026" not "end of FY".
+
+# RULE D — Old Regime deduction description wording:
+Never say "the key deduction was X" — this implies it was the most important one chosen strategically.
+Always say: "Under the Old Regime, the currently declared deduction is Rs X under Section 80C (PF contribution), reducing taxable income from Rs A to Rs B."
+Use the exact figures from the input data for A and B.
+
+# RULE E — 87A rebate explanation wording:
+Never say "Tax is zero because taxable income is below Rs 12,00,000."
+Always say: "Tax is zero because the calculated tax under the New Regime is fully offset by the rebate available under Section 87A."
+This avoids hard-coding a threshold that may change across financial years.
+
+# RULE F — Always use employee name in summary:
+The summary must start with the employee's full name from the input data.
+Example: "Muthukumaran P has a gross salary of Rs X..."
+Never start summary with "Gross salary is..." or any anonymous phrasing.
+The name is always present in the input — use it.
+
+# RULE G — Regime confirmation suggestion wording:
+Never say "No deduction action is needed for tax purposes."
+Always say: "No additional tax-planning investments are required, as the recommended New Regime already results in zero tax liability."
