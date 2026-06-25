@@ -1,5 +1,28 @@
 {
+  "financial_year": "2025-26",
+
   "standard_deduction": 75000,
+
+  "old_regime_slabs": {
+    "general": [
+      [250000, 0.0],
+      [500000, 0.05],
+      [1000000, 0.20],
+      [null, 0.30]
+    ],
+    "senior": [
+      [300000, 0.0],
+      [500000, 0.05],
+      [1000000, 0.20],
+      [null, 0.30]
+    ],
+    "very_senior": [
+      [500000, 0.0],
+      [1000000, 0.20],
+      [null, 0.30]
+    ]
+  },
+
   "new_regime_slabs": [
     [400000, 0.0],
     [800000, 0.05],
@@ -9,6 +32,38 @@
     [2400000, 0.25],
     [null, 0.30]
   ],
-  "rebate_87a_new_limit": 1200000,
-  "rebate_87a_old_limit": 500000
+
+  "rebate_87a": {
+    "old_limit": 500000,
+    "old_max_rebate": 12500,
+    "new_limit": 1200000
+  },
+
+  "deduction_limits": {
+    "sec_80c": 150000,
+    "nps_80ccd_1b": 50000,
+    "health_80d_self": 25000,
+    "health_80d_self_senior": 50000,
+    "health_80d_parents": 50000,
+    "home_loan_24b": 200000,
+    "sec_80tta": 10000
+  },
+
+  "surcharge": {
+    "old_regime": [
+      [5000000, 0.0],
+      [10000000, 0.10],
+      [20000000, 0.15],
+      [50000000, 0.25],
+      [null, 0.37]
+    ],
+    "new_regime": [
+      [5000000, 0.0],
+      [10000000, 0.10],
+      [20000000, 0.15],
+      [null, 0.25]
+    ]
+  },
+
+  "cess_rate": 0.04
 }
