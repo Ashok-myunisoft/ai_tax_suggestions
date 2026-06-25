@@ -16,12 +16,12 @@ def _safe_parse(raw: str) -> dict:
     return json.loads(text)
 
 
-def generate_suggestions(system_prompt: str, user_prompt: str):
+def generate_suggestions(system_prompt: str, user_prompt: str) -> dict:
     """
     Calls OpenAI with given prompts.
     DOES NOT compute tax — only sends prompts and parses response.
+    No employee data is retained after this call returns.
     """
-
     try:
         response = client.chat.completions.create(
             model=OPENAI_CHAT,
@@ -32,20 +32,18 @@ def generate_suggestions(system_prompt: str, user_prompt: str):
             temperature=0.1,
             response_format={"type": "json_object"},
         )
-
         raw_content = response.choices[0].message.content.strip()
 
     except Exception as e:
         return {"error": "OpenAI API call failed", "details": str(e)}
 
-    # Parse JSON safely
     try:
         advisory = _safe_parse(raw_content)
     except json.JSONDecodeError as e:
         return {
             "error": "GPT returned invalid JSON",
             "details": str(e),
-            "raw": raw_content
+            "raw": raw_content,
         }
 
     return advisory
