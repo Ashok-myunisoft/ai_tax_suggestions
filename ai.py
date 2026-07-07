@@ -5,7 +5,6 @@ from config import OPENAI_API_KEY, OPENAI_CHAT
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-
 def _safe_parse(raw: str) -> dict:
     """Strip markdown fences if any, then parse JSON."""
     text = raw.strip()
@@ -17,11 +16,6 @@ def _safe_parse(raw: str) -> dict:
 
 
 def generate_suggestions(system_prompt: str, user_prompt: str) -> dict:
-    """
-    Calls OpenAI with given prompts.
-    DOES NOT compute tax — only sends prompts and parses response.
-    No employee data is retained after this call returns.
-    """
     try:
         response = client.chat.completions.create(
             model=OPENAI_CHAT,

@@ -64,14 +64,6 @@ def _marginal_rate_old(taxable: int, is_senior: bool, is_very_senior: bool, slab
 def _rebate_with_marginal_relief(
     taxable: int, raw_tax: int, limit: int, max_rebate: int, use_marginal_relief: bool
 ) -> int:
-    """
-    Sec 87A rebate, including marginal relief.
-
-    Without marginal relief, crossing the threshold by even Rs 1 would make
-    the full slab tax apply -- a huge cliff. Marginal relief caps the tax
-    in that narrow zone to just the amount by which income exceeds the
-    threshold, so there's no cliff.
-    """
     if taxable <= limit:
         return min(raw_tax, max_rebate)
 
@@ -80,8 +72,6 @@ def _rebate_with_marginal_relief(
 
     excess_income = taxable - limit
     if raw_tax > excess_income:
-        # Tax payable becomes just the excess over the threshold,
-        # not the full slab-calculated tax.
         relief = raw_tax - excess_income
         return min(relief, raw_tax)
 
@@ -91,11 +81,6 @@ def _rebate_with_marginal_relief(
 def compute_old_regime(profile: dict, rules: dict) -> dict:
     is_senior = bool(profile.get("is_senior"))
     is_very_senior = profile.get("age", 0) >= 80
-    # NOTE: there is currently no field in parser.py / the ERP feed indicating
-    # whether the employee's PARENTS are senior citizens (only the employee's
-    # own age is tracked). Until that field exists, we default to the
-    # non-senior parent limit -- the conservative choice, since it can only
-    # under-state the deduction, never overstate it.
     parents_are_senior = bool(profile.get("parents_senior", False))
 
     gross = profile.get("gross_salary", 0)
@@ -125,7 +110,6 @@ def compute_old_regime(profile: dict, rules: dict) -> dict:
     d80_self_limit = limits["health_80d_self_senior"] if is_senior else limits["health_80d_self"]
     d80_self = min(profile.get("health_ins_self_80d", 0), d80_self_limit)
 
-    # FIX: parents' 80D limit now split senior/non-senior (defaults to non-senior, see note above)
     d80_par_limit = (
         limits["health_80d_parents_senior"] if parents_are_senior else limits["health_80d_parents_non_senior"]
     )
@@ -159,7 +143,6 @@ def compute_old_regime(profile: dict, rules: dict) -> dict:
     raw_tax = _apply_slabs(taxable, slabs)
 
     rebate_cfg = rules["rebate_87a"]
-    # FIX: now uses marginal relief instead of a hard cliff at the threshold
     rebate = _rebate_with_marginal_relief(
         taxable,
         raw_tax,
@@ -214,7 +197,6 @@ def compute_new_regime(profile: dict, rules: dict) -> dict:
     raw_tax = _apply_slabs(taxable, rules["new_regime_slabs"])
 
     rebate_cfg = rules["rebate_87a"]
-    # FIX: now uses marginal relief instead of a hard cliff at the threshold
     rebate = _rebate_with_marginal_relief(
         taxable,
         raw_tax,

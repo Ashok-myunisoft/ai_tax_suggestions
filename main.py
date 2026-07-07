@@ -33,7 +33,7 @@ def home():
     return {
         "status": "running",
         "version": "4.0.0",
-        "note": "POST /suggestions with the raw ERP wrapper JSON. No employee data is stored.",
+        "note": "running successfully",
     }
 
 
@@ -71,12 +71,6 @@ async def get_suggestions(request: Request):
 
     try:
         profile = extract_profile(rows)
-
-        # compare_regimes internally calls compute_deduction_gaps for the flip
-        # calculation — we call it once more here for the prompt builder, which
-        # needs the per-section gap figures. The call is cheap (no I/O after
-        # the first load) and the lru_cache on load_tax_rules prevents any
-        # repeated file reads.
         tax  = compare_regimes(profile)
         gaps = compute_deduction_gaps(profile)
 
@@ -107,8 +101,3 @@ async def get_suggestions(request: Request):
         "name":          profile.get("name"),
         "result":        result,
     }
-
-
-@app.post("/refresh")
-def refresh():
-    return {"status": "stateless server — nothing to reload"}

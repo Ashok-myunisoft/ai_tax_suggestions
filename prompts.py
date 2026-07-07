@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-
 def build_prompt(profile_text: str, profile: dict, tax: dict, gaps: dict) -> str:
     old = tax["old_regime"]
     new = tax["new_regime"]
-    recommended = tax["recommended"]  # "old" or "new"
+    recommended = tax["recommended"]  
 
     old_tax      = old["total_tax"]
     new_tax      = new["total_tax"]
@@ -12,16 +11,12 @@ def build_prompt(profile_text: str, profile: dict, tax: dict, gaps: dict) -> str
     marginal     = old.get("marginal_rate", 0)
     marginal_pct = int(marginal * 100)
 
-    # ── Use the engine's binary-search flip result — never approximate ────────
     flip                    = tax.get("flip", {})
     deduction_needed        = flip.get("deduction_needed_to_flip", 0)
     total_unused_capacity   = flip.get("total_unused_capacity", gaps.get("total_unused_capacity", 0))
     can_flip                = flip.get("can_old_regime_become_better", False)
     flip_note               = flip.get("flip_note", "")
 
-    # ── Per-section tax saving at actual marginal rate ────────────────────────
-    # gap × marginal_rate is still the right approximation FOR INDIVIDUAL SECTIONS
-    # (the binary search is for the total flip point, not per-section estimates).
     def tax_saving(gap: int) -> int:
         return int(gap * marginal)
 
@@ -32,7 +27,6 @@ def build_prompt(profile_text: str, profile: dict, tax: dict, gaps: dict) -> str
     home_loan_saving   = tax_saving(gaps["home_loan_int_gap"])
     tta_saving         = tax_saving(gaps["sec_80tta_gap"])
 
-    # ── Correct headline ──────────────────────────────────────────────────────
     if recommended == "new":
         headline = f"New Regime Recommended — Estimated Tax Saving of Rs {tax_gap:,} vs Old Regime"
     else:
@@ -40,7 +34,6 @@ def build_prompt(profile_text: str, profile: dict, tax: dict, gaps: dict) -> str
 
     senior_label = "Senior Citizen" if profile.get("is_senior") else "Non-Senior Citizen"
 
-    # ── Total declared deductions ─────────────────────────────────────────────
     total_declared = (
         gaps["sec_80c_used"]
         + profile.get("nps_80ccd_1b", 0)

@@ -4,10 +4,6 @@ import re
 from datetime import date, timedelta
 from typing import Any
 
-
-# ── SlNo → field name mapping ─────────────────────────────────────────────────
-# Only the SlNos we actually care about for tax computation.
-
 _SLNO_FIELD: dict[int, str] = {
     1:  "net_taxable_salary",
     2:  "gross_salary",
@@ -55,16 +51,12 @@ _SLNO_FIELD: dict[int, str] = {
     98: "tds_per_month",
 }
 
-# SlNos that carry their value in ValueAmount (not Amount)
 _USE_VALUE_AMOUNT: set[int] = {1, 28, 29, 70, 71, 80, 81, 82, 83, 87}
 
-# 80C sub-item SlNos (32-50) — sum Amount across all of these
 _80C_SLNOS: set[int] = set(range(32, 51))
 
-# HRA and LTA SlNos
 _HRA_SLNO = 8
 _LTA_SLNO = 11
-
 
 def _int(v: Any) -> int:
     try:
@@ -72,12 +64,7 @@ def _int(v: Any) -> int:
     except (TypeError, ValueError):
         return 0
 
-
 def _age(dob_str: str) -> int:
-    """
-    Handles both ISO date strings ('1968-09-16') and the ERP's
-    ASP.NET JSON date format ('/Date(-40714200000)/').
-    """
     try:
         m = re.match(r"/Date\((-?\d+)\)/", dob_str or "")
         if m:
@@ -95,17 +82,9 @@ def _age(dob_str: str) -> int:
 
 
 def extract_profile(rows: list[dict]) -> dict:
-    """
-    Convert a flat list of SlNo ledger rows for ONE employee
-    into a clean structured profile dict.
-
-    Called directly with the rows parsed from the POST request body.
-    No file I/O here.
-    """
     if not rows:
         raise ValueError("Empty row list — cannot extract profile.")
 
-    # Identity fields — same across all rows, read from first row
     first = rows[0]
     profile: dict[str, Any] = {
         "employee_id":   first.get("EmployeeId"),
@@ -119,7 +98,6 @@ def extract_profile(rows: list[dict]) -> dict:
         "period_code":   first.get("PeriodCode", "2026"),
     }
 
-    # Numeric fields — defaults to zero
     numeric: dict[str, int] = {f: 0 for f in _SLNO_FIELD.values()}
     numeric["sec_80c_items_total"] = 0
     numeric["hra_exemption"]       = 0
@@ -143,7 +121,6 @@ def extract_profile(rows: list[dict]) -> dict:
         elif slno == _LTA_SLNO:
             numeric["lta_exemption"] = amt
 
-    # ── Derived convenience fields ────────────────────────────────────────────
     numeric["sec_80c_used"] = min(numeric["sec_80c_items_total"], 150_000)
     numeric["sec_80c_gap"]  = max(0, 150_000 - numeric["sec_80c_items_total"])
 
